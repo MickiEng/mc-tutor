@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiple Choice Tutor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+            background: #f8f9fa;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 25px;
+            border-radius: 16px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: white;
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+        }
+        
+        /* Simplified Start Section */
+        .upload-section {
+            text-align: center;
+            margin: 40px auto;
+            max-width: 500px;
+        }
+
+        .bank-select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            cursor: pointer;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .bank-select:focus {
+            border-color: #667eea;
+        }
+
+        .btn-start {
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-start:hover {
+            background: #218838;
+        }
+
+        /* Quiz UI Elements (Preserved from original) */
+        .mode-selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
+        .mode-btn { padding: 10px 20px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 6px; cursor: pointer; transition: all 0.3s; }
+        .mode-btn.active { background: #3498db; color: white; }
+        .question-counter { text-align: center; margin-bottom: 20px; font-size: 18px; color: #666; }
+        .question-container { min-height: 400px; }
+        .question-stem { background: #e8f4f8; padding: 20px; border-radius: 8px; margin-bottom: 10px; border: 2px solid transparent; }
+        .show-choices-btn { display: block; width: 100%; padding: 12px; background: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-bottom: 20px; transition: background 0.3s; }
+        .show-choices-btn.hidden { display: none; }
+        .choices-container { display: none; margin-top: 20px; }
+        .choice { padding: 15px; margin: 10px 0; border: 2px solid #ddd; border-radius: 6px; cursor: pointer; transition: all 0.3s; background: white; display: flex; align-items: center; justify-content: space-between; }
+        .choice-content { flex: 1; }
+        .choice:hover { border-color: #3498db; background: #f8f9fa; }
+        .choice.eliminated { text-decoration: line-through; opacity: 0.5; background: #f8d7da; border-color: #dc3545; }
+        .choice.selected { font-weight: bold; background: #d1ecf1; border-color: #3498db; }
+        .choice.correct-answer { background: #d4edda; border-color: #28a745; font-weight: bold; }
+        .choice.incorrect-selected { background: #f8d7da; border-color: #dc3545; font-weight: bold; }
+        .choice-label { font-weight: bold; display: inline-block; width: 20px; }
+        .rationale-btn { background: #5a6d8c; color: white; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 20px; line-height: 32px; text-align: center; cursor: pointer; transition: all 0.3s; flex-shrink: 0; margin-left: 10px; }
+        .controls { text-align: center; margin: 30px 0; }
+        .btn { padding: 12px 24px; margin: 0 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
+        .btn-primary { background: #3498db; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .results-info { text-align: center; margin: 20px 0; padding: 15px; background: #e8f5e8; border-radius: 6px; color: #155724; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .error { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .hidden { display: none; }
+        
+        /* Modals */
+        #rationaleModal, #embedModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 999; justify-content: center; align-items: center; padding: 20px; display: none; }
+        #rationaleModalContent, #modalContent { background: #ffffff; padding: 30px; border-radius: 12px; width: 90vw; max-width: 600px; position: relative; }
+        #closeRationaleBtn, #closeModalBtn { position: absolute; top: 10px; right: 15px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-box">
+            <h1>Multiple Choice Tutor</h1>
+        </div>
+        
+        <div class="upload-section" id="uploadSection">
+            <div id="uploadError" class="error hidden"></div>
+            <select id="bankSelect" class="bank-select">
+                <option value="">Choose a Topic...</option>
+                <option value="banks/Advanced Health Assessment - Review.csv">Advanced Health Assessment: Review</option>
+            </select>
+            <button class="btn-start" id="loadBankBtn">Start Quiz</button>
+        </div>
+        
+        <div id="quizSection" class="hidden">
+            <div class="mode-selector">
+                <button class="mode-btn active" id="eliminationMode">Elimination Mode</button>
+                <button class="mode-btn" id="answerMode">Answer Mode</button>
+            </div>
+            
+            <div class="question-counter" id="questionCounter"></div>
+            
+            <div class="question-container">
+                <div class="question-stem" id="questionStem">
+                    <div id="stemText"></div>
+                </div>
+                
+                <button class="show-choices-btn" id="showChoicesBtn">Show Answer Choices</button>
+                
+                <div class="choices-container" id="choicesContainer">
+                    <div class="choice" id="choiceA">
+                        <div class="choice-content"><span class="choice-label">A.</span> <span class="choice-text"></span></div>
+                        <button class="rationale-btn" data-choice="A">?</button>
+                    </div>
+                    <div class="choice" id="choiceB">
+                        <div class="choice-content"><span class="choice-label">B.</span> <span class="choice-text"></span></div>
+                        <button class="rationale-btn" data-choice="B">?</button>
+                    </div>
+                    <div class="choice" id="choiceC">
+                        <div class="choice-content"><span class="choice-label">C.</span> <span class="choice-text"></span></div>
+                        <button class="rationale-btn" data-choice="C">?</button>
+                    </div>
+                    <div class="choice" id="choiceD">
+                        <div class="choice-content"><span class="choice-label">D.</span> <span class="choice-text"></span></div>
+                        <button class="rationale-btn" data-choice="D">?</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn btn-secondary" id="prevBtn">Previous</button>
+                <button class="btn btn-secondary hidden" id="resetBtn">Reset</button>
+                <button class="btn btn-primary hidden" id="submitBtn" style="background: #28a745;">Submit Answer</button>
+                <button class="btn btn-primary" id="nextBtn">Next</button>
+            </div>
+            
+            <div class="results-info hidden" id="resultsInfo"></div>
+        </div>
+    </div>
+
+    <div id="rationaleModal" class="hidden"><div id="rationaleModalContent"><button id="closeRationaleBtn">&times;</button><h3 id="rationaleTitle"></h3><div id="rationaleText"></div></div></div>
+    <div id="embedModal" class="hidden"><div id="modalContent"><button id="closeModalBtn">&times;</button><div id="embedTarget"></div></div></div>
+
+    <script>
+        // JS logic remains unchanged to preserve existing behavior
+        let questions = [], currentQuestionIndex = 0, isEliminationMode = true, userAnswers = {}, showingResults = false;
+
+        const uploadSection = document.getElementById('uploadSection'), quizSection = document.getElementById('quizSection'), bankSelect = document.getElementById('bankSelect'), loadBankBtn = document.getElementById('loadBankBtn');
+        const stemText = document.getElementById('stemText'), choicesContainer = document.getElementById('choicesContainer'), choices = document.querySelectorAll('.choice'), resultsInfo = document.getElementById('resultsInfo');
+
+        loadBankBtn.addEventListener('click', () => {
+            const path = bankSelect.value;
+            if (!path) return alert('Please choose a topic.');
+            fetch(path).then(r => r.text()).then(csv => {
+                Papa.parse(csv, {
+                    header: true, skipEmptyLines: true, transformHeader: h => h.toLowerCase().trim(),
+                    complete: (res) => {
+                        questions = res.data.filter(r => r.id && r.stem).map(r => ({
+                            id: r.id, stem: r.stem, choices: { A: r.choice_a, B: r.choice_b, C: r.choice_c, D: r.choice_d },
+                            rationales: { A: r.choice_a_rationale || 'None', B: r.choice_b_rationale || 'None', C: r.choice_c_rationale || 'None', D: r.choice_d_rationale || 'None' },
+                            correct: r.correct.toString().toUpperCase().trim(), embed_code: r.embed_code || ''
+                        }));
+                        uploadSection.classList.add('hidden');
+                        quizSection.classList.remove('hidden');
+                        displayQuestion();
+                    }
+                });
+            });
+        });
+
+        function displayQuestion() {
+            const q = questions[currentQuestionIndex];
+            document.getElementById('questionCounter').textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+            stemText.textContent = q.stem;
+            ['A','B','C','D'].forEach((l, i) => choices[i].querySelector('.choice-text').textContent = q.choices[l]);
+            choicesContainer.style.display = 'none';
+            document.getElementById('showChoicesBtn').classList.remove('hidden');
+            resetQuestionState();
+            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
+            document.getElementById('nextBtn').disabled = currentQuestionIndex === questions.length - 1;
+        }
+
+        function resetQuestionState() {
+            choices.forEach(c => c.classList.remove('eliminated', 'selected', 'correct-answer', 'incorrect-selected'));
+            showingResults = false; resultsInfo.classList.add('hidden'); 
+            document.getElementById('submitBtn').classList.add('hidden');
+            document.getElementById('resetBtn').classList.add('hidden');
+            isEliminationMode = true;
+            document.getElementById('eliminationMode').classList.add('active');
+            document.getElementById('answerMode').classList.remove('active');
+        }
+
+        function handleChoiceClick(e) {
+            if (e.target.classList.contains('rationale-btn') || showingResults) return;
+            const card = e.currentTarget;
+            if (isEliminationMode) {
+                card.classList.toggle('eliminated');
+                if (document.querySelectorAll('.choice:not(.eliminated)').length <= 1) setMode(false);
+            } else {
+                choices.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                userAnswers[currentQuestionIndex] = card.id.replace('choice', '');
+                document.getElementById('submitBtn').classList.remove('hidden');
+                document.getElementById('resetBtn').classList.remove('hidden');
+            }
+        }
+
+        function setMode(elim) {
+            isEliminationMode = elim;
+            document.getElementById('eliminationMode').classList.toggle('active', elim);
+            document.getElementById('answerMode').classList.toggle('active', !elim);
+        }
+
+        document.getElementById('showChoicesBtn').addEventListener('click', () => {
+            choicesContainer.style.display = 'block';
+            document.getElementById('showChoicesBtn').classList.add('hidden');
+        });
+
+        choices.forEach(c => c.addEventListener('click', handleChoiceClick));
+        document.getElementById('prevBtn').addEventListener('click', () => { currentQuestionIndex--; displayQuestion(); });
+        document.getElementById('nextBtn').addEventListener('click', () => { currentQuestionIndex++; displayQuestion(); });
+        document.getElementById('submitBtn').addEventListener('click', () => {
+            const q = questions[currentQuestionIndex], ans = userAnswers[currentQuestionIndex];
+            showingResults = true;
+            choices.forEach((c, i) => {
+                const l = ['A','B','C','D'][i];
+                if (l === q.correct) c.classList.add('correct-answer');
+                if (l === ans && ans !== q.correct) c.classList.add('incorrect-selected');
+            });
+            resultsInfo.innerHTML = `<strong>${ans === q.correct ? 'Correct!' : 'Incorrect.'}</strong> Answer: ${q.correct}`;
+            resultsInfo.classList.remove('hidden');
+            document.getElementById('submitBtn').classList.add('hidden');
+        });
+
+        document.querySelectorAll('.rationale-btn').forEach(b => b.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const choice = e.target.dataset.choice;
+            document.getElementById('rationaleTitle').textContent = `Rationale: Choice ${choice}`;
+            document.getElementById('rationaleText').textContent = questions[currentQuestionIndex].rationales[choice];
+            document.getElementById('rationaleModal').style.display = 'flex';
+        }));
+
+        document.getElementById('closeRationaleBtn').onclick = () => document.getElementById('rationaleModal').style.display = 'none';
+    </script>
+</body>
+</html>
