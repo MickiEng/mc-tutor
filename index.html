@@ -6,82 +6,18 @@
     <title>Multiple Choice Tutor</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
-            background: #f8f9fa;
-        }
+        /* All original styles restored exactly */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; line-height: 1.6; background: #f8f9fa; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header-box { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 16px; margin-bottom: 30px; box-shadow: 0 8px 32px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.2); }
+        h1 { text-align: center; color: white; margin: 0; font-size: 2.5em; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); letter-spacing: 1px; }
         
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .header-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 25px;
-            border-radius: 16px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        
-        h1 {
-            text-align: center;
-            color: white;
-            margin: 0;
-            font-size: 2.5em;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            letter-spacing: 1px;
-        }
-        
-        /* Simplified Start Section */
-        .upload-section {
-            text-align: center;
-            margin: 40px auto;
-            max-width: 500px;
-        }
+        /* Simplified start section */
+        .upload-section { text-align: center; margin: 40px auto; max-width: 500px; }
+        .bank-select { width: 100%; padding: 12px; border-radius: 8px; border: 2px solid #ddd; margin-bottom: 20px; font-size: 1.1em; }
+        .btn-start { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 8px; font-size: 1.2em; font-weight: bold; cursor: pointer; }
 
-        .bank-select {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 2px solid #ddd;
-            margin-bottom: 20px;
-            font-size: 1.1em;
-            cursor: pointer;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .bank-select:focus {
-            border-color: #667eea;
-        }
-
-        .btn-start {
-            width: 100%;
-            padding: 15px;
-            background: #28a745;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.2em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .btn-start:hover {
-            background: #218838;
-        }
-
-        /* Quiz UI Elements (Preserved from original) */
+        /* Restored original quiz styles */
         .mode-selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; }
         .mode-btn { padding: 10px 20px; border: 2px solid #3498db; background: white; color: #3498db; border-radius: 6px; cursor: pointer; transition: all 0.3s; }
         .mode-btn.active { background: #3498db; color: white; }
@@ -92,7 +28,6 @@
         .show-choices-btn.hidden { display: none; }
         .choices-container { display: none; margin-top: 20px; }
         .choice { padding: 15px; margin: 10px 0; border: 2px solid #ddd; border-radius: 6px; cursor: pointer; transition: all 0.3s; background: white; display: flex; align-items: center; justify-content: space-between; }
-        .choice-content { flex: 1; }
         .choice:hover { border-color: #3498db; background: #f8f9fa; }
         .choice.eliminated { text-decoration: line-through; opacity: 0.5; background: #f8d7da; border-color: #dc3545; }
         .choice.selected { font-weight: bold; background: #d1ecf1; border-color: #3498db; }
@@ -103,27 +38,30 @@
         .controls { text-align: center; margin: 30px 0; }
         .btn { padding: 12px 24px; margin: 0 10px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; transition: all 0.3s; }
         .btn-primary { background: #3498db; color: white; }
+        .btn-success { background: #28a745; color: white; }
         .btn-secondary { background: #6c757d; color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .results-info { text-align: center; margin: 20px 0; padding: 15px; background: #e8f5e8; border-radius: 6px; color: #155724; display: flex; flex-direction: column; justify-content: center; align-items: center; }
         .error { color: #dc3545; background: #f8d7da; padding: 10px; border-radius: 4px; margin: 10px 0; }
         .hidden { display: none; }
-        
-        /* Modals */
-        #rationaleModal, #embedModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 999; justify-content: center; align-items: center; padding: 20px; display: none; }
-        #rationaleModalContent, #modalContent { background: #ffffff; padding: 30px; border-radius: 12px; width: 90vw; max-width: 600px; position: relative; }
-        #closeRationaleBtn, #closeModalBtn { position: absolute; top: 10px; right: 15px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; }
+
+        /* Original Modal Styles */
+        #rationaleModal, #embedModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 999; justify-content: center; align-items: center; padding: 20px; }
+        #rationaleModalContent, #modalContent { background: #ffffff; padding: 30px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); width: 90vw; max-width: 600px; position: relative; animation: fadeInScale 0.3s ease-out forwards; }
+        @keyframes fadeInScale { from { transform: scale(0.9); } to { transform: scale(1); } }
+        #closeRationaleBtn, #closeModalBtn { position: absolute; top: 10px; right: 15px; background: #dc3545; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; line-height: 30px; text-align: center; font-size: 20px; cursor: pointer; }
+        .embed-responsive { max-width: 100%; flex-grow: 1; overflow: hidden; padding: 10px 0; display: flex; justify-content: center; align-items: center; }
+        .embed-icon { cursor: pointer; font-size: 20px; margin-left: 10px; color: #ffc107; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header-box">
-            <h1>Multiple Choice Tutor</h1>
-        </div>
+        <div class="header-box"><h1>Multiple Choice Tutor</h1></div>
         
         <div class="upload-section" id="uploadSection">
             <div id="uploadError" class="error hidden"></div>
             <select id="bankSelect" class="bank-select">
-                <option value="">Choose a Topic...</option>
+                <option value="">Select a Question Bank...</option>
                 <option value="banks/Advanced Health Assessment - Review.csv">Advanced Health Assessment: Review</option>
             </select>
             <button class="btn-start" id="loadBankBtn">Start Quiz</button>
@@ -134,150 +72,187 @@
                 <button class="mode-btn active" id="eliminationMode">Elimination Mode</button>
                 <button class="mode-btn" id="answerMode">Answer Mode</button>
             </div>
-            
             <div class="question-counter" id="questionCounter"></div>
-            
             <div class="question-container">
-                <div class="question-stem" id="questionStem">
-                    <div id="stemText"></div>
-                </div>
-                
+                <div class="question-stem" id="questionStem"><div id="stemText"></div></div>
                 <button class="show-choices-btn" id="showChoicesBtn">Show Answer Choices</button>
-                
                 <div class="choices-container" id="choicesContainer">
-                    <div class="choice" id="choiceA">
-                        <div class="choice-content"><span class="choice-label">A.</span> <span class="choice-text"></span></div>
-                        <button class="rationale-btn" data-choice="A">?</button>
-                    </div>
-                    <div class="choice" id="choiceB">
-                        <div class="choice-content"><span class="choice-label">B.</span> <span class="choice-text"></span></div>
-                        <button class="rationale-btn" data-choice="B">?</button>
-                    </div>
-                    <div class="choice" id="choiceC">
-                        <div class="choice-content"><span class="choice-label">C.</span> <span class="choice-text"></span></div>
-                        <button class="rationale-btn" data-choice="C">?</button>
-                    </div>
-                    <div class="choice" id="choiceD">
-                        <div class="choice-content"><span class="choice-label">D.</span> <span class="choice-text"></span></div>
-                        <button class="rationale-btn" data-choice="D">?</button>
-                    </div>
+                    <div class="choice" id="choiceA"><div class="choice-content"><span class="choice-label">A.</span> <span class="choice-text"></span></div><button class="rationale-btn" data-choice="A">?</button></div>
+                    <div class="choice" id="choiceB"><div class="choice-content"><span class="choice-label">B.</span> <span class="choice-text"></span></div><button class="rationale-btn" data-choice="B">?</button></div>
+                    <div class="choice" id="choiceC"><div class="choice-content"><span class="choice-label">C.</span> <span class="choice-text"></span></div><button class="rationale-btn" data-choice="C">?</button></div>
+                    <div class="choice" id="choiceD"><div class="choice-content"><span class="choice-label">D.</span> <span class="choice-text"></span></div><button class="rationale-btn" data-choice="D">?</button></div>
                 </div>
             </div>
-            
             <div class="controls">
                 <button class="btn btn-secondary" id="prevBtn">Previous</button>
                 <button class="btn btn-secondary hidden" id="resetBtn">Reset</button>
-                <button class="btn btn-primary hidden" id="submitBtn" style="background: #28a745;">Submit Answer</button>
+                <button class="btn btn-success hidden" id="submitBtn">Submit Answer</button>
                 <button class="btn btn-primary" id="nextBtn">Next</button>
             </div>
-            
             <div class="results-info hidden" id="resultsInfo"></div>
         </div>
     </div>
 
-    <div id="rationaleModal" class="hidden"><div id="rationaleModalContent"><button id="closeRationaleBtn">&times;</button><h3 id="rationaleTitle"></h3><div id="rationaleText"></div></div></div>
-    <div id="embedModal" class="hidden"><div id="modalContent"><button id="closeModalBtn">&times;</button><div id="embedTarget"></div></div></div>
+    <div id="rationaleModal" class="hidden"><div id="rationaleModalContent"><button id="closeRationaleBtn">&times;</button><h3 id="rationaleTitle">Rationale</h3><div id="rationaleText"></div></div></div>
+    <div id="embedModal" class="hidden"><div id="modalContent"><button id="closeModalBtn">&times;</button><div id="embedTarget" class="embed-responsive"></div></div></div>
 
     <script>
-        // JS logic remains unchanged to preserve existing behavior
-        let questions = [], currentQuestionIndex = 0, isEliminationMode = true, userAnswers = {}, showingResults = false;
+        // FULL ORIGINAL LOGIC RESTORED
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let isEliminationMode = true;
+        let userAnswers = {};
+        let showingResults = false;
 
-        const uploadSection = document.getElementById('uploadSection'), quizSection = document.getElementById('quizSection'), bankSelect = document.getElementById('bankSelect'), loadBankBtn = document.getElementById('loadBankBtn');
-        const stemText = document.getElementById('stemText'), choicesContainer = document.getElementById('choicesContainer'), choices = document.querySelectorAll('.choice'), resultsInfo = document.getElementById('resultsInfo');
+        const uploadSection = document.getElementById('uploadSection');
+        const quizSection = document.getElementById('quizSection');
+        const bankSelect = document.getElementById('bankSelect');
+        const loadBankBtn = document.getElementById('loadBankBtn');
+        const eliminationModeBtn = document.getElementById('eliminationMode');
+        const answerModeBtn = document.getElementById('answerMode');
+        const questionCounter = document.getElementById('questionCounter');
+        const stemText = document.getElementById('stemText');
+        const showChoicesBtn = document.getElementById('showChoicesBtn');
+        const choicesContainer = document.getElementById('choicesContainer');
+        const choices = document.querySelectorAll('.choice');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const resetBtn = document.getElementById('resetBtn'); 
+        const submitBtn = document.getElementById('submitBtn');
+        const resultsInfo = document.getElementById('resultsInfo');
 
-        loadBankBtn.addEventListener('click', () => {
+        loadBankBtn.addEventListener('click', loadSelectedBank);
+        eliminationModeBtn.addEventListener('click', () => setMode(true));
+        answerModeBtn.addEventListener('click', () => setMode(false));
+        showChoicesBtn.addEventListener('click', expandQuestion);
+        choices.forEach(choice => choice.addEventListener('click', handleChoiceClick));
+        prevBtn.addEventListener('click', () => navigateQuestion(-1));
+        nextBtn.addEventListener('click', () => navigateQuestion(1));
+        resetBtn.addEventListener('click', resetQuestionState); 
+        submitBtn.addEventListener('click', submitAnswer);
+        
+        document.getElementById('closeModalBtn').onclick = hideEmbedModal;
+        document.getElementById('closeRationaleBtn').onclick = hideRationaleModal;
+        document.querySelectorAll('.rationale-btn').forEach(btn => btn.addEventListener('click', handleRationaleClick));
+
+        function loadSelectedBank() {
             const path = bankSelect.value;
-            if (!path) return alert('Please choose a topic.');
-            fetch(path).then(r => r.text()).then(csv => {
-                Papa.parse(csv, {
+            if (!path) return;
+            fetch(path).then(res => res.text()).then(csvText => {
+                Papa.parse(csvText, {
                     header: true, skipEmptyLines: true, transformHeader: h => h.toLowerCase().trim(),
-                    complete: (res) => {
-                        questions = res.data.filter(r => r.id && r.stem).map(r => ({
-                            id: r.id, stem: r.stem, choices: { A: r.choice_a, B: r.choice_b, C: r.choice_c, D: r.choice_d },
-                            rationales: { A: r.choice_a_rationale || 'None', B: r.choice_b_rationale || 'None', C: r.choice_c_rationale || 'None', D: r.choice_d_rationale || 'None' },
-                            correct: r.correct.toString().toUpperCase().trim(), embed_code: r.embed_code || ''
-                        }));
-                        uploadSection.classList.add('hidden');
-                        quizSection.classList.remove('hidden');
-                        displayQuestion();
+                    complete: function(results) {
+                        questions = processQuestions(results.data);
+                        if (questions.length > 0) {
+                            uploadSection.classList.add('hidden');
+                            quizSection.classList.remove('hidden');
+                            displayQuestion();
+                        }
                     }
                 });
             });
-        });
+        }
+
+        function processQuestions(data) {
+            const processed = [];
+            for (let row of data) {
+                if (!row.id || !row.stem) continue;
+                let correct = row.correct.toString().toUpperCase().trim();
+                if (['1','2','3','4'].includes(correct)) correct = ['A','B','C','D'][parseInt(correct)-1];
+                processed.push({
+                    id: row.id, topic: row.topic || '', bloom: row.bloom || '', stem: row.stem,
+                    choices: { A: row.choice_a, B: row.choice_b, C: row.choice_c, D: row.choice_d },
+                    rationales: { 
+                        A: row.choice_a_rationale || 'No rationale.', B: row.choice_b_rationale || 'No rationale.',
+                        C: row.choice_c_rationale || 'No rationale.', D: row.choice_d_rationale || 'No rationale.'
+                    },
+                    correct: correct, embed_code: row.embed_code || ''
+                });
+            }
+            return processed;
+        }
 
         function displayQuestion() {
             const q = questions[currentQuestionIndex];
-            document.getElementById('questionCounter').textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
+            questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
             stemText.textContent = q.stem;
-            ['A','B','C','D'].forEach((l, i) => choices[i].querySelector('.choice-text').textContent = q.choices[l]);
+            choices[0].querySelector('.choice-text').textContent = q.choices.A;
+            choices[1].querySelector('.choice-text').textContent = q.choices.B;
+            choices[2].querySelector('.choice-text').textContent = q.choices.C;
+            choices[3].querySelector('.choice-text').textContent = q.choices.D;
             choicesContainer.style.display = 'none';
-            document.getElementById('showChoicesBtn').classList.remove('hidden');
+            showChoicesBtn.classList.remove('hidden');
             resetQuestionState();
-            document.getElementById('prevBtn').disabled = currentQuestionIndex === 0;
-            document.getElementById('nextBtn').disabled = currentQuestionIndex === questions.length - 1;
+            prevBtn.disabled = currentQuestionIndex === 0;
+            nextBtn.disabled = currentQuestionIndex === questions.length - 1;
         }
 
-        function resetQuestionState() {
-            choices.forEach(c => c.classList.remove('eliminated', 'selected', 'correct-answer', 'incorrect-selected'));
-            showingResults = false; resultsInfo.classList.add('hidden'); 
-            document.getElementById('submitBtn').classList.add('hidden');
-            document.getElementById('resetBtn').classList.add('hidden');
-            isEliminationMode = true;
-            document.getElementById('eliminationMode').classList.add('active');
-            document.getElementById('answerMode').classList.remove('active');
-        }
-
-        function handleChoiceClick(e) {
-            if (e.target.classList.contains('rationale-btn') || showingResults) return;
-            const card = e.currentTarget;
+        function handleChoiceClick(event) {
+            if (event.target.classList.contains('rationale-btn') || showingResults) return;
+            const clickedChoice = event.currentTarget;
             if (isEliminationMode) {
-                card.classList.toggle('eliminated');
+                clickedChoice.classList.toggle('eliminated');
                 if (document.querySelectorAll('.choice:not(.eliminated)').length <= 1) setMode(false);
             } else {
                 choices.forEach(c => c.classList.remove('selected'));
-                card.classList.add('selected');
-                userAnswers[currentQuestionIndex] = card.id.replace('choice', '');
-                document.getElementById('submitBtn').classList.remove('hidden');
-                document.getElementById('resetBtn').classList.remove('hidden');
+                clickedChoice.classList.add('selected');
+                userAnswers[currentQuestionIndex] = clickedChoice.id.replace('choice', '');
+                submitBtn.classList.remove('hidden');
+                resetBtn.classList.remove('hidden');
             }
+        }
+
+        function submitAnswer() {
+            const q = questions[currentQuestionIndex];
+            const userAnswer = userAnswers[currentQuestionIndex];
+            showingResults = true;
+            choices.forEach((choice, index) => {
+                const label = ['A', 'B', 'C', 'D'][index];
+                if (label === q.correct) choice.classList.add('correct-answer');
+                if (label === userAnswer && userAnswer !== q.correct) choice.classList.add('incorrect-selected');
+            });
+            resultsInfo.innerHTML = `<div><strong>${userAnswer === q.correct ? 'Correct!' : 'Incorrect.'}</strong></div>`;
+            if (q.embed_code) {
+                const btn = document.createElement('span');
+                btn.innerHTML = ' ★'; btn.className = 'embed-icon';
+                btn.onclick = () => showEmbedModal(q.embed_code);
+                resultsInfo.appendChild(btn);
+            }
+            resultsInfo.classList.remove('hidden');
+            submitBtn.classList.add('hidden');
         }
 
         function setMode(elim) {
             isEliminationMode = elim;
-            document.getElementById('eliminationMode').classList.toggle('active', elim);
-            document.getElementById('answerMode').classList.toggle('active', !elim);
+            eliminationModeBtn.classList.toggle('active', elim);
+            answerModeBtn.classList.toggle('active', !elim);
         }
 
-        document.getElementById('showChoicesBtn').addEventListener('click', () => {
-            choicesContainer.style.display = 'block';
-            document.getElementById('showChoicesBtn').classList.add('hidden');
-        });
+        function expandQuestion() { choicesContainer.style.display = 'block'; showChoicesBtn.classList.add('hidden'); }
+        function navigateQuestion(dir) { currentQuestionIndex += dir; displayQuestion(); }
+        function resetQuestionState() { 
+            choices.forEach(c => c.classList.remove('eliminated', 'selected', 'correct-answer', 'incorrect-selected')); 
+            showingResults = false; resultsInfo.classList.add('hidden'); submitBtn.classList.add('hidden'); resetBtn.classList.add('hidden');
+            setMode(true);
+        }
 
-        choices.forEach(c => c.addEventListener('click', handleChoiceClick));
-        document.getElementById('prevBtn').addEventListener('click', () => { currentQuestionIndex--; displayQuestion(); });
-        document.getElementById('nextBtn').addEventListener('click', () => { currentQuestionIndex++; displayQuestion(); });
-        document.getElementById('submitBtn').addEventListener('click', () => {
-            const q = questions[currentQuestionIndex], ans = userAnswers[currentQuestionIndex];
-            showingResults = true;
-            choices.forEach((c, i) => {
-                const l = ['A','B','C','D'][i];
-                if (l === q.correct) c.classList.add('correct-answer');
-                if (l === ans && ans !== q.correct) c.classList.add('incorrect-selected');
-            });
-            resultsInfo.innerHTML = `<strong>${ans === q.correct ? 'Correct!' : 'Incorrect.'}</strong> Answer: ${q.correct}`;
-            resultsInfo.classList.remove('hidden');
-            document.getElementById('submitBtn').classList.add('hidden');
-        });
-
-        document.querySelectorAll('.rationale-btn').forEach(b => b.addEventListener('click', (e) => {
+        function handleRationaleClick(e) {
             e.stopPropagation();
-            const choice = e.target.dataset.choice;
-            document.getElementById('rationaleTitle').textContent = `Rationale: Choice ${choice}`;
+            const choice = e.target.getAttribute('data-choice');
+            document.getElementById('rationaleTitle').textContent = `Rationale for Choice ${choice}`;
             document.getElementById('rationaleText').textContent = questions[currentQuestionIndex].rationales[choice];
             document.getElementById('rationaleModal').style.display = 'flex';
-        }));
+            document.getElementById('rationaleModal').classList.remove('hidden');
+        }
 
-        document.getElementById('closeRationaleBtn').onclick = () => document.getElementById('rationaleModal').style.display = 'none';
+        function showEmbedModal(code) {
+            document.getElementById('embedTarget').innerHTML = code;
+            document.getElementById('embedModal').style.display = 'flex';
+            document.getElementById('embedModal').classList.remove('hidden');
+        }
+
+        function hideRationaleModal() { document.getElementById('rationaleModal').style.display = 'none'; }
+        function hideEmbedModal() { document.getElementById('embedTarget').innerHTML = ''; document.getElementById('embedModal').style.display = 'none'; }
     </script>
 </body>
 </html>
