@@ -68,21 +68,20 @@
             padding: 8px;
         }
 
-        /* Layout for the selection card */
         .options-grid {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
-            justify-content: center;
+            justify-content: center; /* Centered for single card */
         }
 
         .option-card {
-            flex: 0 1 400px;
+            flex: 0 1 400px; /* Fixed width for the single card */
             border: 1px solid #e0e0e0;
             border-radius: 8px;
             padding: 15px 15px 20px;
             background: #fafafa;
-            text-align: center;
+            text-align: left;
         }
 
         .option-card h3 {
@@ -108,6 +107,47 @@
             font-size: 0.95em;
         }
 
+        .info-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            font-size: 18px;
+            line-height: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s;
+            flex-shrink: 0;
+            padding: 0;
+            font-weight: bold;
+        }
+
+        #templateInstructions {
+            text-align: left;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            background: #e9ecef;
+            line-height: 1.5;
+            font-size: 0.9em;
+        }
+
+        .btn-template-download {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        
         .mode-selector {
             display: flex;
             justify-content: center;
@@ -161,10 +201,6 @@
             font-size: 16px;
             margin-bottom: 20px;
             transition: background 0.3s;
-        }
-        
-        .show-choices-btn.hover {
-            background: #2980b9;
         }
         
         .show-choices-btn.hidden {
@@ -316,7 +352,6 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            display: none;
         }
         
         #rationaleModalContent, #modalContent {
@@ -324,8 +359,10 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 90vw;
             max-width: 600px;
-            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
             position: relative;
         }
 
@@ -333,10 +370,33 @@
             position: absolute;
             top: 10px;
             right: 15px;
-            font-size: 24px;
-            cursor: pointer;
-            background: none;
+            background: #dc3545;
+            color: white;
             border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .embed-responsive {
+            max-width: 100%;
+            flex-grow: 1;
+            overflow: hidden; 
+            padding: 10px 0; 
+            display: flex; 
+            justify-content: center;
+            align-items: center; 
+        }
+
+        .embed-icon {
+            cursor: pointer;
+            font-size: 20px;
+            margin-left: 10px;
+            color: #ffc107;
         }
     </style>
 </head>
@@ -348,7 +408,7 @@
         
         <div class="upload-section" id="uploadSection">
             <h2 class="upload-title">Get started with your quiz</h2>
-            <p class="upload-subtitle">Choose one of the options below to load questions.</p>
+            <p class="upload-subtitle">Choose the option below to load questions.</p>
 
             <div id="uploadError" class="error hidden"></div>
 
@@ -437,12 +497,12 @@
     <div id="embedModal" class="hidden">
         <div id="modalContent">
             <button id="closeModalBtn">&times;</button>
-            <div id="embedTarget"></div>
+            <div id="embedTarget" class="embed-responsive"></div>
         </div>
     </div>
 
     <script>
-        // ORIGINAL SCRIPT - UNTOUCHED
+        /* ORIGINAL SCRIPT - COPIED WORD FOR WORD FROM INDEX (3).HTML */
         let questions = [];
         let currentQuestionIndex = 0;
         let isEliminationMode = true;
@@ -503,19 +563,17 @@
         rationaleModal.addEventListener('click', handleRationaleModalOutsideClick);
         rationaleBtns.forEach(btn => btn.addEventListener('click', handleRationaleClick));
 
-        if (toggleTemplateInstructionsBtn) {
-            toggleTemplateInstructionsBtn.addEventListener('click', () => templateInstructions.classList.toggle('hidden'));
-        }
-        if (downloadTemplateBtn) {
-            downloadTemplateBtn.addEventListener('click', downloadCsvTemplate);
-        }
+        toggleTemplateInstructionsBtn.addEventListener('click', () => templateInstructions.classList.toggle('hidden'));
+        downloadTemplateBtn.addEventListener('click', downloadCsvTemplate);
 
         if (loadBankBtn) {
             loadBankBtn.addEventListener('click', loadSelectedBank);
         }
 
         function downloadCsvTemplate() {
-            const csvData = ["id", "topic", "bloom", "stem", "choice_a", "choice_b", "choice_c", "choice_d", "correct", "choice_a_rationale", "choice_b_rationale", "choice_c_rationale", "choice_d_rationale", "embed_code"].join(',');
+            const csvData = [
+                "id", "topic", "bloom", "stem", "choice_a", "choice_b", "choice_c", "choice_d", "correct", "choice_a_rationale", "choice_b_rationale", "choice_c_rationale", "choice_d_rationale", "embed_code"
+            ].join(',');
             const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
             const url = URL.createObjectURL(blob);
@@ -527,52 +585,109 @@
         function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
+            uploadError.classList.add('hidden');
             Papa.parse(file, {
                 header: true,
                 skipEmptyLines: true,
                 transformHeader: header => header.toLowerCase().trim(),
                 complete: function(results) {
-                    questions = processQuestions(results.data);
-                    initializeQuiz();
+                    if (results.errors.length > 0) {
+                        showError('CSV parsing errors: ' + results.errors.map(e => e.message).join(', '));
+                        return;
+                    }
+                    try {
+                        questions = processQuestions(results.data);
+                        if (questions.length === 0) {
+                            showError('No valid questions found.');
+                            return;
+                        }
+                        initializeQuiz();
+                    } catch (error) {
+                        showError('Error processing questions: ' + error.message);
+                    }
                 }
             });
         }
 
         function loadSelectedBank() {
             const path = bankSelect.value;
-            if (!path) return;
+            if (!path) {
+                showError('Please select a question bank to load.');
+                return;
+            }
+            uploadError.classList.add('hidden');
             fetch(path)
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) throw new Error('Unable to load bank.');
+                    return response.text();
+                })
                 .then(csvText => {
                     Papa.parse(csvText, {
                         header: true,
                         skipEmptyLines: true,
                         transformHeader: header => header.toLowerCase().trim(),
                         complete: function(results) {
-                            questions = processQuestions(results.data);
-                            initializeQuiz();
+                            try {
+                                questions = processQuestions(results.data);
+                                initializeQuiz();
+                            } catch (error) {
+                                showError('Error processing questions: ' + error.message);
+                            }
                         }
                     });
-                });
+                })
+                .catch(err => showError(err.message));
         }
 
         function processQuestions(data) {
-            return data.map(row => ({
-                id: row.id || '',
-                topic: row.topic || '',
-                bloom: row.bloom || '',
-                stem: row.stem,
-                choices: { A: row.choice_a, B: row.choice_b, C: row.choice_c, D: row.choice_d },
-                rationales: { A: row.choice_a_rationale, B: row.choice_b_rationale, C: row.choice_c_rationale, D: row.choice_d_rationale },
-                correct: row.correct.toString().toUpperCase().trim(),
-                embed_code: row.embed_code || ''
-            }));
+            const requiredFields = ['id', 'stem', 'choice_a', 'choice_b', 'choice_c', 'choice_d', 'correct']; 
+            const processedQuestions = [];
+            for (let row of data) {
+                const missingFields = requiredFields.filter(field => !row.hasOwnProperty(field) || (row[field] !== 0 && row[field] !== '0' && row[field] !== false && row[field] !== 'false' && !row[field]));
+                if (missingFields.length > 0) continue;
+
+                let correct = row.correct.toString().toUpperCase().trim();
+                if (['1', '2', '3', '4'].includes(correct)) {
+                    correct = ['A', 'B', 'C', 'D'][parseInt(correct) - 1];
+                }
+                
+                if (!['A', 'B', 'C', 'D'].includes(correct)) continue;
+
+                processedQuestions.push({
+                    id: row.id ? row.id.trim() : '',
+                    topic: row.topic ? row.topic.trim() : '', 
+                    bloom: row.bloom ? row.bloom.trim() : '', 
+                    stem: row.stem.trim(),
+                    choices: {
+                        A: row.choice_a.trim(),
+                        B: row.choice_b.trim(),
+                        C: row.choice_c.trim(),
+                        D: row.choice_d.trim()
+                    },
+                    rationales: {
+                        A: row.choice_a_rationale ? row.choice_a_rationale.trim() : 'No rationale provided.',
+                        B: row.choice_b_rationale ? row.choice_b_rationale.trim() : 'No rationale provided.',
+                        C: row.choice_c_rationale ? row.choice_c_rationale.trim() : 'No rationale provided.',
+                        D: row.choice_d_rationale ? row.choice_d_rationale.trim() : 'No rationale provided.'
+                    },
+                    correct: correct,
+                    embed_code: row.embed_code ? row.embed_code.trim() : '' 
+                });
+            }
+            return processedQuestions;
+        }
+
+        function showError(message) {
+            uploadError.textContent = message;
+            uploadError.classList.remove('hidden');
         }
 
         function initializeQuiz() {
             uploadSection.classList.add('hidden');
             quizSection.classList.remove('hidden');
             currentQuestionIndex = 0;
+            userAnswers = {};
+            showingResults = false;
             displayQuestion();
         }
 
@@ -580,6 +695,14 @@
             isEliminationMode = elimination;
             eliminationModeBtn.classList.toggle('active', elimination);
             answerModeBtn.classList.toggle('active', !elimination);
+            choices.forEach(choice => {
+                choice.style.pointerEvents = 'auto';
+            });
+            if (elimination) {
+                choices.forEach(choice => choice.classList.remove('selected'));
+                submitBtn.classList.add('hidden');
+                resetBtn.classList.add('hidden');
+            }
         }
 
         function expandQuestion() {
@@ -588,66 +711,88 @@
         }
 
         function displayQuestion() {
-            const q = questions[currentQuestionIndex];
+            const question = questions[currentQuestionIndex];
             questionCounter.textContent = `Question ${currentQuestionIndex + 1} of ${questions.length}`;
-            stemText.textContent = q.stem;
-            choices[0].querySelector('.choice-text').textContent = q.choices.A;
-            choices[1].querySelector('.choice-text').textContent = q.choices.B;
-            choices[2].querySelector('.choice-text').textContent = q.choices.C;
-            choices[3].querySelector('.choice-text').textContent = q.choices.D;
+            stemText.textContent = question.stem;
+            choices[0].querySelector('.choice-text').textContent = question.choices.A;
+            choices[1].querySelector('.choice-text').textContent = question.choices.B;
+            choices[2].querySelector('.choice-text').textContent = question.choices.C;
+            choices[3].querySelector('.choice-text').textContent = question.choices.D;
             choicesContainer.style.display = 'none';
             showChoicesBtn.classList.remove('hidden');
-            resetQuestionState();
+            resetQuestionState(); 
+            prevBtn.disabled = currentQuestionIndex === 0;
+            nextBtn.disabled = currentQuestionIndex === questions.length - 1;
         }
 
         function resetQuestionState() {
-            choices.forEach(c => c.classList.remove('eliminated', 'selected', 'correct-answer', 'incorrect-selected'));
+            choices.forEach(choice => {
+                choice.classList.remove('eliminated', 'selected', 'correct-answer', 'incorrect-selected');
+                choice.style.pointerEvents = 'auto'; 
+            });
+            setMode(true);
             resultsInfo.classList.add('hidden');
             showingResults = false;
         }
 
-        function handleChoiceClick(e) {
-            if (showingResults) return;
-            const clicked = e.currentTarget;
+        function handleChoiceClick(event) {
+            if (event.target.classList.contains('rationale-btn') || showingResults) return;
+            const clickedChoice = event.currentTarget;
             if (isEliminationMode) {
-                clicked.classList.toggle('eliminated');
+                clickedChoice.classList.toggle('eliminated');
+                if (document.querySelectorAll('.choice:not(.eliminated)').length <= 1) setMode(false);
             } else {
-                choices.forEach(c => c.classList.remove('selected'));
-                clicked.classList.add('selected');
-                userAnswers[currentQuestionIndex] = clicked.id.replace('choice', '');
+                choices.forEach(choice => choice.classList.remove('selected'));
+                clickedChoice.classList.add('selected');
+                userAnswers[currentQuestionIndex] = clickedChoice.id.replace('choice', '');
                 submitBtn.classList.remove('hidden');
+                resetBtn.classList.remove('hidden');
             }
         }
 
         function submitAnswer() {
-            const q = questions[currentQuestionIndex];
-            const ans = userAnswers[currentQuestionIndex];
+            if (!userAnswers[currentQuestionIndex]) return;
+            const question = questions[currentQuestionIndex];
+            const userAnswer = userAnswers[currentQuestionIndex];
+            const isCorrect = userAnswer === question.correct;
             showingResults = true;
-            choices.forEach((c, i) => {
-                const label = ['A', 'B', 'C', 'D'][i];
-                if (label === q.correct) c.classList.add('correct-answer');
-                if (label === ans && ans !== q.correct) c.classList.add('incorrect-selected');
+            choices.forEach((choice, index) => {
+                const label = ['A', 'B', 'C', 'D'][index];
+                choice.classList.remove('selected');
+                if (label === question.correct) choice.classList.add('correct-answer');
+                if (label === userAnswer && !isCorrect) choice.classList.add('incorrect-selected');
             });
+            resultsInfo.innerHTML = `<div class="result-message">${isCorrect ? 'Correct!' : 'Incorrect.'} The answer is ${question.correct}.</div>`;
+            if (question.topic || question.bloom) {
+                resultsInfo.innerHTML += `<div class="meta-info">${question.topic || ''} | ${question.bloom || ''}</div>`;
+            }
             resultsInfo.classList.remove('hidden');
             submitBtn.classList.add('hidden');
+            resetBtn.classList.add('hidden');
         }
 
-        function navigateQuestion(dir) {
-            currentQuestionIndex += dir;
-            displayQuestion();
+        function navigateQuestion(direction) {
+            const newIndex = currentQuestionIndex + direction;
+            if (newIndex >= 0 && newIndex < questions.length) {
+                currentQuestionIndex = newIndex;
+                displayQuestion();
+            }
         }
 
-        function handleRationaleClick(e) {
-            const choice = e.target.getAttribute('data-choice');
-            const q = questions[currentQuestionIndex];
-            rationaleText.textContent = q.rationales[choice];
+        function handleRationaleClick(event) {
+            event.stopPropagation();
+            const choice = event.target.getAttribute('data-choice');
+            const question = questions[currentQuestionIndex];
+            rationaleTitle.textContent = `Rationale for Choice ${choice}`;
+            rationaleText.textContent = question.rationales[choice];
             rationaleModal.style.display = 'flex';
+            rationaleModal.classList.remove('hidden');
         }
-
+        
         function hideRationaleModal() { rationaleModal.style.display = 'none'; }
-        function handleRationaleModalOutsideClick(e) { if (e.target === rationaleModal) hideRationaleModal(); }
+        function handleRationaleModalOutsideClick(event) { if (event.target === rationaleModal) hideRationaleModal(); }
         function hideEmbedModal() { embedModal.style.display = 'none'; }
-        function handleModalOutsideClick(e) { if (e.target === embedModal) hideEmbedModal(); }
+        function handleModalOutsideClick(event) { if (event.target === embedModal) hideEmbedModal(); }
     </script>
 </body>
 </html>
